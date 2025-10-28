@@ -1,0 +1,4 @@
+#TODO install model config
+
+
+Dependicies - pyqt5, piper-tts

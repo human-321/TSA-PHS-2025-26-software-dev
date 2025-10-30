@@ -6,11 +6,22 @@ from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QPushButton, QWidget, QVBoxLayout, QHBoxLayout, 
                               QLineEdit, QSizePolicy , QScrollArea,QGroupBox, QLabel, QLayout, QAction)
 
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QObject, QThread, pyqtSignal, pyqtSlot
 
-global tts
-def tts(words):
-    speak.speak(words)
+
+global soundManager
+class soundManagerClass(QObject):
+    #wrapper for speak.py
+    ttsActive = pyqtSignal(bool)
+
+    @pyqtSlot(str)
+    def speak(self,words):
+        self.ttsActive.emit(True)
+        speak.speak(words)
+        self.ttsActive.emit(False)
+soundManager = soundManagerClass()
+
+
 
 
 class designSettingsClass():
@@ -25,6 +36,11 @@ class designSettingsClass():
         self.resetToDefault()
 
 class mainWindowClass(QMainWindow):
+    ttsRequest = pyqtSignal(str)
+
+    def tts(self,words : str):
+        self.ttsRequest.emit(words)
+
     def __init__(self):
         super().__init__()
 
@@ -48,7 +64,6 @@ class mainWindowClass(QMainWindow):
         self.main_layout_wrapper.setLayout(self.main_layout)
         #endregion
 
-
         self.program_title_widget = QLabel()
         self.program_title_widget.setText(current_settings.program_name)
         self.program_title_widget.textFormat()
@@ -56,16 +71,30 @@ class mainWindowClass(QMainWindow):
         self.main_layout.addWidget(self.program_title_widget,alignment=Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop )
         
         self.tempText = QLineEdit()
-        self.tempText.returnPressed.connect(lambda: tts(self.tempText.text()))
+        self.tempText.returnPressed.connect(lambda: self.tts(self.tempText.text()))
 
         self.main_layout.addWidget(self.tempText)
 
 
+
+
+
+        #endregion
+
+        #region threading
+
+        self.soundThread = QThread()
+        soundManager.moveToThread(self.soundThread)
+
+        self.ttsRequest.connect(soundManager.speak)
+
+        self.soundThread.start()
         #endregion
 
         self.setCentralWidget(self.main_layout_wrapper)
         # self.setLayout(self.main_layout)
         self.show()
+
 
 
 def startApp():
@@ -77,7 +106,6 @@ def startApp():
     main_window = mainWindowClass()
     
     # speak.speak("testing testing testing")
-    tts("fuck you")
 
     # Show the window
     sys.exit(app.exec_())

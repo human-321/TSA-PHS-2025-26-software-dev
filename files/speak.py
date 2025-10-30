@@ -2,17 +2,26 @@
 
 
 # # python3 -m piper.download_voices en_US-lessac-medium
-
+import os
+import winsound
 import wave
+
 from piper import PiperVoice
 
 
-# voice = PiperVoice.load("assets\en_US-lessac-medium.onnx" )
-
+baseWavName = "wahwahstopreadingthisSpAmSpAm_b.wav"
+voice = PiperVoice.load("assets\\en_US-lessac-medium.onnx" , "assets\\en_US-lessac-medium.onnx.json")
 
 def speak(words):
-    print(words)
-    # with wave.open("test.wav", "wb") as wav_file:
-    #     voice.synthesize_wav(words, wav_file)
+    wavName = baseWavName
+
+    with wave.open(wavName, "wb") as wav_file:
+        voice.synthesize_wav(words, wav_file)
+    
+    winsound.PlaySound(wavName,winsound.SND_FILENAME)
+
+    if os.path.exists(wavName):
+        os.remove(wavName)
+    
 
 

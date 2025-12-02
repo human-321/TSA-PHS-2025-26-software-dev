@@ -3,10 +3,11 @@ import speak
 import sys
 import PyQt5
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import (QApplication, QMainWindow, QPushButton, QWidget, QVBoxLayout, QHBoxLayout, 
+from PyQt5.QtGui        import QIcon, QPixmap, QResizeEvent
+from PyQt5.QtWidgets    import (QApplication, QMainWindow, QPushButton, QWidget, QVBoxLayout, QHBoxLayout, 
                               QLineEdit, QSizePolicy , QScrollArea,QGroupBox, QLabel, QLayout, QAction)
 
-from PyQt5.QtCore import Qt, QObject, QThread, pyqtSignal, pyqtSlot
+from PyQt5.QtCore       import Qt, QObject, QThread, pyqtSignal, pyqtSlot, QSize
 
 
 global soundManager
@@ -70,10 +71,28 @@ class mainWindowClass(QMainWindow):
         self.program_title_widget.setContentsMargins(0,1,0,1)
         self.main_layout.addWidget(self.program_title_widget,alignment=Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop )
         
-        self.tempText = QLineEdit()
-        self.tempText.returnPressed.connect(lambda: self.tts(self.tempText.text()))
 
-        self.main_layout.addWidget(self.tempText)
+
+        self.readbox = QHBoxLayout()
+
+        self.readLineEdit = QLineEdit()
+        self.readButton = QPushButton()
+        self.readLineEdit.returnPressed.connect(lambda: self.tts(self.readLineEdit.text()))
+        self.readButton.pressed.connect(lambda: self.tts(self.readLineEdit.text()))
+
+        self.readButton.setMinimumSize(100,100)
+
+        self.readButtonIcon = QIcon("assets\\img\\readButton.jpg")
+        
+        self.readButton.setIcon(self.readButtonIcon)
+        self.readButton.setIconSize(QSize(100,100))
+
+        self.readbox.addWidget(self.readButton)
+        self.readbox.addWidget(self.readLineEdit)
+
+
+        
+        self.main_layout.addLayout(self.readbox)
 
 
 

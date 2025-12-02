@@ -1,4 +1,11 @@
-#TODO install model config
 
 
-Dependicies - pyqt5, piper-tts
+
+Dependicies - pyqt5, piper-tts, Speech Recognition , 
+
+
+when working in vs code use a venv and install all packages like
+    pip install <PACKAGENAME> --target .venv\Lib
+also the command below activates the venv
+    .venv/Scripts/activate.bat
+

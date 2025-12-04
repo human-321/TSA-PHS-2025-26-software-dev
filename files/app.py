@@ -3,7 +3,7 @@ import speak
 import sys
 import PyQt5
 from PyQt5 import QtWidgets
-from PyQt5.QtGui        import QIcon, QPixmap, QResizeEvent
+from PyQt5.QtGui        import QIcon, QPixmap, QResizeEvent, QFont
 from PyQt5.QtWidgets    import (QApplication, QMainWindow, QPushButton, QWidget, QVBoxLayout, QHBoxLayout, 
                               QLineEdit, QSizePolicy , QScrollArea,QGroupBox, QLabel, QLayout, QAction)
 
@@ -29,12 +29,19 @@ class designSettingsClass():
 
     def resetToDefault(self):
         self.window_name = "TSA PHS 2025-26 software dev"
-        self.program_name = "temp name"
-        self.window_start_size = [400,300]
+        self.program_name = "audio-visual disablity helper"
+        self.window_start_size = [500,600]
+        
+
+        self.program_title_spacing = 0
+        self.main_font = QFont("Helvetica",27)
+
+
 
     def __init__(self):
 
         self.resetToDefault()
+        app.setFont(self.main_font)
 
 class mainWindowClass(QMainWindow):
     ttsRequest = pyqtSignal(str)
@@ -65,38 +72,84 @@ class mainWindowClass(QMainWindow):
         self.main_layout_wrapper.setLayout(self.main_layout)
         #endregion
 
-        self.program_title_widget = QLabel()
-        self.program_title_widget.setText(current_settings.program_name)
-        self.program_title_widget.textFormat()
-        self.program_title_widget.setContentsMargins(0,1,0,1)
-        self.main_layout.addWidget(self.program_title_widget,alignment=Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop )
+        self.buttonSizePolicy = QSizePolicy(QSizePolicy.Policy.Fixed,QSizePolicy.Policy.Fixed)
         
+        # title
+        self.program_title_widget = QLabel(current_settings.program_name)
+        self.program_title_widget.textFormat()
+        self.program_title_widget.setContentsMargins(0,current_settings.program_title_spacing,0,current_settings.program_title_spacing)
+        
+        
+        #help
+
+        self.helpBox = QHBoxLayout()
+        
+        self.helpButton = QPushButton()
+        self.helpHeader = QLabel("<= help button")
+        self.helpButton.setMinimumSize(100,100)
+        self.helpButton.setSizePolicy(self.buttonSizePolicy)
 
 
+        self.helpButtonIcon = QIcon("assets\\img\\helpButton.jpg")
+        self.helpButton.setIcon(self.helpButtonIcon)
+        self.helpButton.setIconSize(QSize(100,100))
+
+        self.helpBox.addWidget(self.helpButton)
+        self.helpBox.addWidget(self.helpHeader)
+
+        #listener
+
+        self.listenbox = QHBoxLayout()
+
+        self.listenHeader = QLabel("listener")
+        self.listenLineEdit = QLineEdit()
+        self.listenButton = QPushButton()
+        self.listenButton.setSizePolicy(self.buttonSizePolicy)
+
+        self.listenButton.setMinimumSize(100,100)
+        self.listenButtonIcon = QIcon("assets\\img\\listenerButton.jpg")
+        self.listenButton.setIcon(self.listenButtonIcon)
+        self.listenButton.setIconSize(QSize(100,100))
+
+        self.listenTextLayout = QVBoxLayout()
+        self.listenTextLayout.addWidget(self.listenHeader,alignment=Qt.AlignmentFlag.AlignBottom)
+        self.listenTextLayout.addWidget(self.listenLineEdit,alignment=Qt.AlignmentFlag.AlignTop)
+        self.listenTextLayout.setContentsMargins(0,0,0,0)
+
+        self.listenbox.addWidget(self.listenButton,alignment=Qt.AlignmentFlag.AlignVCenter)
+        self.listenbox.addLayout(self.listenTextLayout)
+
+        #reader
         self.readbox = QHBoxLayout()
 
         self.readLineEdit = QLineEdit()
         self.readButton = QPushButton()
+        self.readHeader = QLabel("Reader")
         self.readLineEdit.returnPressed.connect(lambda: self.tts(self.readLineEdit.text()))
         self.readButton.pressed.connect(lambda: self.tts(self.readLineEdit.text()))
+        self.setSizePolicy(self.buttonSizePolicy)
 
         self.readButton.setMinimumSize(100,100)
-
         self.readButtonIcon = QIcon("assets\\img\\readButton.jpg")
-        
         self.readButton.setIcon(self.readButtonIcon)
         self.readButton.setIconSize(QSize(100,100))
 
-        self.readbox.addWidget(self.readButton)
-        self.readbox.addWidget(self.readLineEdit)
+        self.readTextLayout = QVBoxLayout()
+        self.readTextLayout.addWidget(self.readHeader, alignment= Qt.AlignmentFlag.AlignBottom)
+        self.readTextLayout.addWidget(self.readLineEdit, alignment= Qt.AlignmentFlag.AlignTop)
+        self.readTextLayout.setContentsMargins(0,0,0,0)
 
+        self.readbox.addWidget(self.readButton, alignment= Qt.AlignmentFlag.AlignVCenter)
+        self.readbox.addLayout(self.readTextLayout)
 
-        
+        #main layout
+        self.main_layout.addWidget(self.program_title_widget,alignment=Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop )
+        self.main_layout.addLayout(self.helpBox)
+        self.main_layout.addLayout(self.listenbox)
         self.main_layout.addLayout(self.readbox)
 
 
-
-
+        
 
         #endregion
 
@@ -117,6 +170,7 @@ class mainWindowClass(QMainWindow):
 
 
 def startApp():
+
     global app, current_settings, main_window
     app = QtWidgets.QApplication(sys.argv)
 

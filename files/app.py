@@ -3,9 +3,9 @@ import speak
 import sys
 import PyQt5
 from PyQt5 import QtWidgets
-from PyQt5.QtGui        import QIcon, QPixmap, QResizeEvent, QFont
+from PyQt5.QtGui        import QIcon, QPixmap, QResizeEvent, QFont, QColor
 from PyQt5.QtWidgets    import (QApplication, QMainWindow, QPushButton, QWidget, QVBoxLayout, QHBoxLayout, 
-                              QLineEdit, QSizePolicy , QScrollArea,QGroupBox, QLabel, QLayout, QAction)
+                              QLineEdit, QSizePolicy , QScrollArea,QGroupBox, QLabel, QLayout, QAction, QFrame)
 
 from PyQt5.QtCore       import Qt, QObject, QThread, pyqtSignal, pyqtSlot, QSize
 
@@ -17,9 +17,10 @@ class soundManagerClass(QObject):
 
     @pyqtSlot(str)
     def speak(self,words):
-        self.ttsActive.emit(True)
-        speak.speak(words)
-        self.ttsActive.emit(False)
+        if(len(words) > 0):
+            self.ttsActive.emit(True)
+            speak.speak(words)
+            self.ttsActive.emit(False)
 soundManager = soundManagerClass()
 
 
@@ -30,12 +31,15 @@ class designSettingsClass():
     def resetToDefault(self):
         self.window_name = "TSA PHS 2025-26 software dev"
         self.program_name = "audio-visual disablity helper"
-        self.window_start_size = [500,600]
+        self.window_start_size = [600,600]
         
 
         self.program_title_spacing = 0
         self.main_font = QFont("Helvetica",27)
 
+        self.appBorder = 10
+
+        self.backgroundColor = "#d6ffe1"
 
 
     def __init__(self):
@@ -63,24 +67,30 @@ class mainWindowClass(QMainWindow):
 
         #endregion
 
-
         #region ui
 
-        #region NO FUCKING TOUCHING
+        #region NO TOUCHING
         self.main_layout_wrapper= QGroupBox()
         self.main_layout = QVBoxLayout()
         self.main_layout_wrapper.setLayout(self.main_layout)
-        #endregion
 
         self.buttonSizePolicy = QSizePolicy(QSizePolicy.Policy.Fixed,QSizePolicy.Policy.Fixed)
-        
-        # title
+        self.sectionBoxPolicy = QSizePolicy(QSizePolicy.Policy.Expanding,QSizePolicy.Policy.Expanding)
+        #endregion
+
+        #region title
+        self.titleBox = QVBoxLayout()
         self.program_title_widget = QLabel(current_settings.program_name)
-        self.program_title_widget.textFormat()
         self.program_title_widget.setContentsMargins(0,current_settings.program_title_spacing,0,current_settings.program_title_spacing)
+        self.program_title_widget.setSizePolicy(QSizePolicy(QSizePolicy.Policy.Fixed,QSizePolicy.Policy.Minimum))
+
+        self.titleBox.addWidget(self.program_title_widget,0,Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop)
+        self.titleBox.setContentsMargins(0,0,0,0)
+        # self.program_title_widget.setFixedHeight(self.program_title_widget.minimumSizeHint().height())
+
+        #endregion
         
-        
-        #help
+        #region help
 
         self.helpBox = QHBoxLayout()
         
@@ -93,34 +103,50 @@ class mainWindowClass(QMainWindow):
         self.helpButtonIcon = QIcon("assets\\img\\helpButton.jpg")
         self.helpButton.setIcon(self.helpButtonIcon)
         self.helpButton.setIconSize(QSize(100,100))
+        self.helpBox.setContentsMargins(0,0,0,0)
 
         self.helpBox.addWidget(self.helpButton)
         self.helpBox.addWidget(self.helpHeader)
+        
+        #endregion
 
-        #listener
+        #region listener
 
-        self.listenbox = QHBoxLayout()
+        self.listenBox = QHBoxLayout()
 
         self.listenHeader = QLabel("listener")
         self.listenLineEdit = QLineEdit()
-        self.listenButton = QPushButton()
-        self.listenButton.setSizePolicy(self.buttonSizePolicy)
+        self.listenButtonMic = QPushButton()
+        self.listenButtonMic.setSizePolicy(self.buttonSizePolicy)
+        self.listenButtonFile = QPushButton()
+        self.listenButtonFile.setSizePolicy(self.buttonSizePolicy)
 
-        self.listenButton.setMinimumSize(100,100)
-        self.listenButtonIcon = QIcon("assets\\img\\listenerButton.jpg")
-        self.listenButton.setIcon(self.listenButtonIcon)
-        self.listenButton.setIconSize(QSize(100,100))
+        self.listenButtonMic.setMinimumSize(100,100)
+        self.listenButtonFile.setMinimumSize(100,100)
+
+        self.listenButtonMicIcon = QIcon("assets\\img\\listenerButton.jpg")
+        self.listenButtonFileIcon = QIcon("assets\\img\\listenerButton.jpg")
+
+        self.listenButtonMic.setIcon(self.listenButtonMicIcon)
+        self.listenButtonMic.setIconSize(QSize(100,100))
+        self.listenButtonFile.setIcon(self.listenButtonFileIcon)
+        self.listenButtonFile.setIconSize(QSize(100,100))
+
 
         self.listenTextLayout = QVBoxLayout()
         self.listenTextLayout.addWidget(self.listenHeader,alignment=Qt.AlignmentFlag.AlignBottom)
         self.listenTextLayout.addWidget(self.listenLineEdit,alignment=Qt.AlignmentFlag.AlignTop)
         self.listenTextLayout.setContentsMargins(0,0,0,0)
 
-        self.listenbox.addWidget(self.listenButton,alignment=Qt.AlignmentFlag.AlignVCenter)
-        self.listenbox.addLayout(self.listenTextLayout)
+        self.listenBox.setContentsMargins(0,0,0,0)
+        self.listenBox.addWidget(self.listenButtonMic,alignment=Qt.AlignmentFlag.AlignVCenter)
+        self.listenBox.addWidget(self.listenButtonFile,alignment=Qt.AlignmentFlag.AlignVCenter)
+        self.listenBox.addLayout(self.listenTextLayout)
 
-        #reader
-        self.readbox = QHBoxLayout()
+        #endregion
+
+        #region reader
+        self.readBox = QHBoxLayout()
 
         self.readLineEdit = QLineEdit()
         self.readButton = QPushButton()
@@ -139,17 +165,38 @@ class mainWindowClass(QMainWindow):
         self.readTextLayout.addWidget(self.readLineEdit, alignment= Qt.AlignmentFlag.AlignTop)
         self.readTextLayout.setContentsMargins(0,0,0,0)
 
-        self.readbox.addWidget(self.readButton, alignment= Qt.AlignmentFlag.AlignVCenter)
-        self.readbox.addLayout(self.readTextLayout)
+        self.readBox.addWidget(self.readButton, alignment= Qt.AlignmentFlag.AlignVCenter)
+        self.readBox.addLayout(self.readTextLayout)
+        self.readBox.setContentsMargins(0,0,0,0)
 
-        #main layout
-        self.main_layout.addWidget(self.program_title_widget,alignment=Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop )
-        self.main_layout.addLayout(self.helpBox)
-        self.main_layout.addLayout(self.listenbox)
-        self.main_layout.addLayout(self.readbox)
+        #endregion
 
+        #region main layout
+        self.titleFrame = QFrame()
+        self.titleFrame.setLayout(self.titleBox)
+        self.titleFrame.setStyleSheet("margin-bottom: 0px")
 
+        self.helpFrame = QFrame()
+        self.helpFrame.setLayout(self.helpBox)
+
+        self.listenFrame = QFrame()
+        self.listenFrame.setLayout(self.listenBox)
+
+        self.readFrame = QFrame()
+        self.readFrame.setLayout(self.readBox)
+
+        self.main_layout.setContentsMargins(current_settings.appBorder,current_settings.appBorder,current_settings.appBorder,current_settings.appBorder)
+        self.main_layout.setSpacing(0)
+        app.setStyleSheet(f"background-color: {current_settings.backgroundColor};")
+
+        self.main_layout.addWidget(self.titleFrame ,stretch=0)
+        self.main_layout.addWidget(self.helpFrame  ,stretch=999)
+        self.main_layout.addWidget(self.listenFrame,stretch=999)
+        self.main_layout.addWidget(self.readFrame  ,stretch=999)
+
+        #endregion
         
+
 
         #endregion
 

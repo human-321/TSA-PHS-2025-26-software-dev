@@ -30,16 +30,27 @@ class designSettingsClass():
 
     def resetToDefault(self):
         self.window_name = "TSA PHS 2025-26 software dev"
-        self.program_name = "audio-visual disablity helper"
+        self.program_name = "Audio-Visual Disablity Helper"
         self.window_start_size = [600,600]
         
 
         self.program_title_spacing = 0
-        self.main_font = QFont("Helvetica",27)
+        self.titleFont = QFont("Times", 32)
+        self.main_font = QFont("Arial",27)
+
+        self.helpButtonImgLink =   "assets\\img\\helpButton.png"
+        self.readButtonImgLink =   "assets\\img\\readButton.jpg"
+        self.listenFileButtonImgLink = "assets\\img\\listenButton.jpg"
+        self.listenMicButtonImgLink = "assets\\img\\listenButton.jpg"
 
         self.appBorder = 10
+        self.lineEditPadding = 5
 
-        self.backgroundColor = "#d6ffe1"
+        self.backgroundColor = "#91faee"
+        self.secondaryColor = "#694646"
+        self.lineEditColor = "#faf7b1"
+        self.black = "#000000"
+        
 
 
     def __init__(self):
@@ -52,6 +63,37 @@ class mainWindowClass(QMainWindow):
 
     def tts(self,words : str):
         self.ttsRequest.emit(words)
+    
+    def ttsReadFromReader(self):
+        self.tts(self.readLineEdit.text())
+    
+    def makeButton(self,imgLink:str,func = lambda: None):
+        buttonSizePolicy = QSizePolicy(QSizePolicy.Policy.Fixed,QSizePolicy.Policy.Fixed)
+        output = QPushButton()
+        output.setMinimumSize(100,100)
+        output.setSizePolicy(buttonSizePolicy)
+        output.setIcon(QIcon(imgLink))
+        output.setIconSize(QSize(100,100))
+        output.pressed.connect(func)
+        return output
+
+    def updateUI(self):
+        self.title_widget.setText(current_settings.program_name)
+        self.title_widget.setFont(current_settings.titleFont)
+
+        # color stuff
+        self.setStyleSheet(f"background-color: {current_settings.backgroundColor};")
+        self.readLineEdit.setStyleSheet(self.styleSheet() + f"""
+                                        background-color: {current_settings.lineEditColor}; 
+                                        border: 3px solid {current_settings.black}; 
+                                        padding: {current_settings.lineEditPadding} """)
+        
+        self.listenLineEdit.setStyleSheet(self.styleSheet() + f"""
+                                        background-color: {current_settings.lineEditColor}; 
+                                        border: 3px solid {current_settings.black}; 
+                                        padding: {current_settings.lineEditPadding} """)
+
+        self.helpButton.setStyleSheet(self.styleSheet() + f"""padding:0px;border: 0px;""")
 
     def __init__(self):
         super().__init__()
@@ -80,11 +122,11 @@ class mainWindowClass(QMainWindow):
 
         #region title
         self.titleBox = QVBoxLayout()
-        self.program_title_widget = QLabel(current_settings.program_name)
-        self.program_title_widget.setContentsMargins(0,current_settings.program_title_spacing,0,current_settings.program_title_spacing)
-        self.program_title_widget.setSizePolicy(QSizePolicy(QSizePolicy.Policy.Fixed,QSizePolicy.Policy.Minimum))
+        self.title_widget = QLabel(current_settings.program_name)
+        self.title_widget.setContentsMargins(0,current_settings.program_title_spacing,0,current_settings.program_title_spacing)
+        self.title_widget.setSizePolicy(QSizePolicy(QSizePolicy.Policy.Fixed,QSizePolicy.Policy.Minimum))
 
-        self.titleBox.addWidget(self.program_title_widget,0,Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop)
+        self.titleBox.addWidget(self.title_widget,0,Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop)
         self.titleBox.setContentsMargins(0,0,0,0)
         # self.program_title_widget.setFixedHeight(self.program_title_widget.minimumSizeHint().height())
 
@@ -94,15 +136,9 @@ class mainWindowClass(QMainWindow):
 
         self.helpBox = QHBoxLayout()
         
-        self.helpButton = QPushButton()
+        self.helpButton = self.makeButton(current_settings.helpButtonImgLink)
         self.helpHeader = QLabel("<= help button")
-        self.helpButton.setMinimumSize(100,100)
-        self.helpButton.setSizePolicy(self.buttonSizePolicy)
 
-
-        self.helpButtonIcon = QIcon("assets\\img\\helpButton.jpg")
-        self.helpButton.setIcon(self.helpButtonIcon)
-        self.helpButton.setIconSize(QSize(100,100))
         self.helpBox.setContentsMargins(0,0,0,0)
 
         self.helpBox.addWidget(self.helpButton)
@@ -116,21 +152,8 @@ class mainWindowClass(QMainWindow):
 
         self.listenHeader = QLabel("listener")
         self.listenLineEdit = QLineEdit()
-        self.listenButtonMic = QPushButton()
-        self.listenButtonMic.setSizePolicy(self.buttonSizePolicy)
-        self.listenButtonFile = QPushButton()
-        self.listenButtonFile.setSizePolicy(self.buttonSizePolicy)
-
-        self.listenButtonMic.setMinimumSize(100,100)
-        self.listenButtonFile.setMinimumSize(100,100)
-
-        self.listenButtonMicIcon = QIcon("assets\\img\\listenerButton.jpg")
-        self.listenButtonFileIcon = QIcon("assets\\img\\listenerButton.jpg")
-
-        self.listenButtonMic.setIcon(self.listenButtonMicIcon)
-        self.listenButtonMic.setIconSize(QSize(100,100))
-        self.listenButtonFile.setIcon(self.listenButtonFileIcon)
-        self.listenButtonFile.setIconSize(QSize(100,100))
+        self.listenButtonMic = self.makeButton(current_settings.listenMicButtonImgLink)
+        self.listenButtonFile = self.makeButton(current_settings.listenFileButtonImgLink)
 
 
         self.listenTextLayout = QVBoxLayout()
@@ -149,16 +172,9 @@ class mainWindowClass(QMainWindow):
         self.readBox = QHBoxLayout()
 
         self.readLineEdit = QLineEdit()
-        self.readButton = QPushButton()
+        self.readButton = self.makeButton(current_settings.readButtonImgLink,self.ttsReadFromReader)
         self.readHeader = QLabel("Reader")
         self.readLineEdit.returnPressed.connect(lambda: self.tts(self.readLineEdit.text()))
-        self.readButton.pressed.connect(lambda: self.tts(self.readLineEdit.text()))
-        self.setSizePolicy(self.buttonSizePolicy)
-
-        self.readButton.setMinimumSize(100,100)
-        self.readButtonIcon = QIcon("assets\\img\\readButton.jpg")
-        self.readButton.setIcon(self.readButtonIcon)
-        self.readButton.setIconSize(QSize(100,100))
 
         self.readTextLayout = QVBoxLayout()
         self.readTextLayout.addWidget(self.readHeader, alignment= Qt.AlignmentFlag.AlignBottom)
@@ -187,16 +203,17 @@ class mainWindowClass(QMainWindow):
 
         self.main_layout.setContentsMargins(current_settings.appBorder,current_settings.appBorder,current_settings.appBorder,current_settings.appBorder)
         self.main_layout.setSpacing(0)
-        app.setStyleSheet(f"background-color: {current_settings.backgroundColor};")
 
         self.main_layout.addWidget(self.titleFrame ,stretch=0)
         self.main_layout.addWidget(self.helpFrame  ,stretch=999)
         self.main_layout.addWidget(self.listenFrame,stretch=999)
         self.main_layout.addWidget(self.readFrame  ,stretch=999)
 
-        #endregion
         
 
+        #endregion
+        
+        self.updateUI()
 
         #endregion
 

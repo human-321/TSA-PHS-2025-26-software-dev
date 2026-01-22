@@ -1,11 +1,20 @@
 import speech_recognition as sr
+#https://realpython.com/python-speech-recognition/
 
 
-listen_file = sr.AudioFile('assets\listen.wav')
 r = sr.Recognizer()
 
-r.recognize_ibm()
 
-def startListening():
-    with listen_file as source:
+
+def getMicData(): #get mic data save to a file return file address
+    return 'assets\listen.wav'
+
+def decodeAudio():
+    dataPath = getMicData()
+    harvard = sr.AudioFile(dataPath)
+    with harvard as source:
+        r.adjust_for_ambient_noise(source,duration=0.5)
         audio = r.record(source)
+
+    r.recognize_tensorflow(audio)
+

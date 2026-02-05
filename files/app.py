@@ -45,14 +45,14 @@ class designSettingsClass():
         self.main_font = QFont("Arial",27)
 
         self.helpButtonImgLink =   "assets\\img\\helpButton.png"
-        self.readButtonImgLink =   "assets\\img\\readButton.jpg"
+        self.readButtonImgLink =   "assets\\img\\readButton.png"
         self.listenFileButtonImgLink = "assets\\img\\listenFileButton.png"
         self.listenMicButtonImgLink = "assets\\img\\listenMicButton.png"
 
         self.appBorder = 10
         self.lineEditPadding = 5
 
-        self.backgroundColor = "#91faee"
+        self.backgroundColor = "#ced4d4"
         self.secondaryColor = "#694646"
         self.lineEditColor = "#faf7b1"
         self.black = "#000000"
